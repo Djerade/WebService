@@ -1,18 +1,21 @@
 from flask import Flask
-from .database import db, migrate
+import os
+# from dotenv import load_dotenv
+from .database import mongo
+
+load_dotenv()  # Charger les variables d'environnement
 
 def create_app():
     app = Flask(__name__)
     
-    # Database configuration
-    app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///users.db'
-    app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+    # Configuration MongoDB
+    app.config['MONGO_URI'] = os.getenv('MONGODB_URI')
+    app.config['SECRET_KEY'] = os.getenv('SECRET_KEY')
     
-    # Initialize extensions
-    db.init_app(app)
-    migrate.init_app(app, db)
+    # Initialiser MongoDB
+    mongo.init_app(app)
     
-    # Import and register blueprints
+    # Importer et enregistrer les blueprints
     from .views.user_views import user_bp
     app.register_blueprint(user_bp)
     

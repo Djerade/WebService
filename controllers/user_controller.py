@@ -1,34 +1,18 @@
+from ..database import mongo
 from ..models.user import User
 
 class UserController:
-    @staticmethod
-    def list_users():
-        """Retrieve all users"""
-        return User.get_all()
+    def __init__(self):
+        self.user_model = User(mongo.cx)
     
-    @staticmethod
-    def get_user(user_id):
-        """Get a specific user"""
-        return User.get_by_id(user_id)
+    def list_users(self):
+        """Récupérer tous les utilisateurs"""
+        return self.user_model.list_users()
     
-    @staticmethod
-    def create_user(username, email):
-        """Create a new user"""
-        return User.create(username, email)
+    def create_user(self, user_data):
+        """Créer un nouvel utilisateur"""
+        return self.user_model.create_user(user_data)
     
-    @staticmethod
-    def update_user(user_id, username=None, email=None):
-        """Update an existing user"""
-        user = User.get_by_id(user_id)
-        if user:
-            return user.update(username, email)
-        return None
-    
-    @staticmethod
-    def delete_user(user_id):
-        """Delete a user"""
-        user = User.get_by_id(user_id)
-        if user:
-            user.delete()
-            return True
-        return False
+    def authenticate_user(self, email, password):
+        """Authentifier un utilisateur"""
+        return self.user_model.authenticate_user(email, password)
