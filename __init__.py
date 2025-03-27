@@ -3,7 +3,7 @@ import os
 # from dotenv import load_dotenv
 from .database import mongo
 
-load_dotenv()  # Charger les variables d'environnement
+# load_dotenv()  # Charger les variables d'environnement
 
 def create_app():
     app = Flask(__name__)
