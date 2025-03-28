@@ -1,0 +1,87 @@
+{% extends "base.html" %} {% block content %}
+<div class="container mt-4">
+  <div class="row">
+    <div class="col-12">
+      <h1 class="mb-4">Bienvenue {{ current_user.username }} !</h1>
+    </div>
+  </div>
+
+  <!-- Featured Products -->
+  <div class="row mb-5">
+    <div class="col-12">
+      <h2 class="mb-4">Produits en Vedette</h2>
+    </div>
+    {% for product in latest_products %}
+    <div class="col-md-4 mb-4">
+      <div class="card h-100">
+        {% if product.image_filename %}
+        <img
+          src="{{ url_for('static', filename='uploads/' + product.image_filename) }}"
+          class="card-img-top"
+          alt="{{ product.name }}"
+          style="height: 200px; object-fit: cover"
+        />
+        {% else %}
+        <img
+          src="{{ url_for('static', filename='images/no-image.jpg') }}"
+          class="card-img-top"
+          alt="No image"
+          style="height: 200px; object-fit: cover"
+        />
+        {% endif %}
+        <div class="card-body">
+          <h5 class="card-title">{{ product.name }}</h5>
+          <p class="card-text">{{ product.description[:100] }}...</p>
+          <p class="card-text"><strong>Prix: {{ product.price }} €</strong></p>
+          <p class="card-text">
+            {% if product.stock > 0 %}
+            <span class="badge bg-success">En stock</span>
+            {% else %}
+            <span class="badge bg-danger">Rupture de stock</span>
+            {% endif %}
+          </p>
+          <a href="#" class="btn btn-primary">Voir détails</a>
+        </div>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+
+  <!-- Quick Actions -->
+  <div class="row">
+    <div class="col-12">
+      <h2 class="mb-4">Actions Rapides</h2>
+    </div>
+    <div class="col-md-4 mb-4">
+      <div class="card">
+        <div class="card-body text-center">
+          <i class="fas fa-shopping-cart fa-3x mb-3 text-primary"></i>
+          <h5 class="card-title">Mon Panier</h5>
+          <p class="card-text">Gérez vos articles</p>
+          <a href="#" class="btn btn-outline-primary">Voir le panier</a>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-4 mb-4">
+      <div class="card">
+        <div class="card-body text-center">
+          <i class="fas fa-list fa-3x mb-3 text-success"></i>
+          <h5 class="card-title">Mes Commandes</h5>
+          <p class="card-text">Suivez vos commandes</p>
+          <a href="#" class="btn btn-outline-success">Voir les commandes</a>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-4 mb-4">
+      <div class="card">
+        <div class="card-body text-center">
+          <i class="fas fa-user fa-3x mb-3 text-info"></i>
+          <h5 class="card-title">Mon Profil</h5>
+          <p class="card-text">Gérez vos informations</p>
+          <a href="#" class="btn btn-outline-info">Modifier le profil</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

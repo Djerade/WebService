@@ -3,11 +3,17 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>{% block title %}Gestion des Produits{% endblock %}</title>
+    <title>
+      {% block title %}Gestion des Produits{% endblock %} - Mon Application
+    </title>
 
     <!-- Bootstrap CSS -->
     <link
       href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
+    <link
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css"
       rel="stylesheet"
     />
 
@@ -24,11 +30,17 @@
         padding: 20px 0;
         background-color: #f8f9fa;
       }
+      body {
+        padding-top: 56px;
+      }
+      .flash-messages {
+        margin-top: 1rem;
+      }
     </style>
   </head>
   <body>
     <!-- Navigation -->
-    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark fixed-top">
       <div class="container">
         <a class="navbar-brand" href="{{ url_for('product.list_products') }}"
           >Gestion des Produits</a
@@ -42,7 +54,7 @@
           <span class="navbar-toggler-icon"></span>
         </button>
         <div class="collapse navbar-collapse" id="navbarNav">
-          <ul class="navbar-nav">
+          <ul class="navbar-nav me-auto">
             <li class="nav-item">
               <a class="nav-link" href="{{ url_for('product.list_products') }}"
                 >Liste des Produits</a
@@ -54,12 +66,39 @@
               >
             </li>
           </ul>
+          <ul class="navbar-nav">
+            {% if current_user.is_authenticated %} {% if
+            current_user.is_vendeur() %}
+            <li class="nav-item">
+              <a class="nav-link" href="{{ url_for('user.dashboard') }}">
+                <i class="fas fa-tachometer-alt"></i> Dashboard
+              </a>
+            </li>
+            {% endif %}
+            <li class="nav-item">
+              <a class="nav-link" href="{{ url_for('user.logout') }}"
+                >Déconnexion</a
+              >
+            </li>
+            {% else %}
+            <li class="nav-item">
+              <a class="nav-link" href="{{ url_for('user.login') }}"
+                >Connexion</a
+              >
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="{{ url_for('user.register') }}"
+                >Inscription</a
+              >
+            </li>
+            {% endif %}
+          </ul>
         </div>
       </div>
     </nav>
 
     <!-- Messages Flash -->
-    <div class="container mt-3">
+    <div class="container flash-messages">
       {% with messages = get_flashed_messages(with_categories=true) %} {% if
       messages %} {% for category, message in messages %}
       <div

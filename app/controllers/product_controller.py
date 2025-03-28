@@ -1,11 +1,12 @@
 from flask import Blueprint, render_template, redirect, url_for, flash, request, current_app
-from flask_login import login_required
+from flask_login import login_required, current_user
 from werkzeug.utils import secure_filename
 from app.models.product import Product
 from app.forms.product_form import ProductForm
 from app import db
 import os
 import uuid
+from functools import wraps
 
 product_bp = Blueprint('product', __name__)
 
@@ -32,6 +33,20 @@ def delete_image(filename):
         if os.path.exists(file_path):
             os.remove(file_path)
 
+def vendeur_required(f):
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        if not current_user.is_authenticated:
+            flash('Veuillez vous connecter pour accéder à cette page.', 'warning')
+            return redirect(url_for('user.login'))
+        
+        if not current_user.is_vendeur():
+            flash('Accès refusé. Cette action est réservée aux vendeurs.', 'danger')
+            return redirect(url_for('product.list_products'))
+        
+        return f(*args, **kwargs)
+    return decorated_function
+
 @product_bp.route('/products')
 def list_products():
     products = Product.query.all()
@@ -39,6 +54,7 @@ def list_products():
 
 @product_bp.route('/products/create', methods=['GET', 'POST'])
 @login_required
+@vendeur_required
 def create_product():
     form = ProductForm()
     if form.validate_on_submit():
@@ -59,6 +75,7 @@ def create_product():
 
 @product_bp.route('/products/<int:id>/edit', methods=['GET', 'POST'])
 @login_required
+@vendeur_required
 def edit_product(id):
     product = Product.query.get_or_404(id)
     form = ProductForm(obj=product)
@@ -83,6 +100,7 @@ def edit_product(id):
 
 @product_bp.route('/products/<int:id>/delete', methods=['POST'])
 @login_required
+@vendeur_required
 def delete_product(id):
     product = Product.query.get_or_404(id)
     
