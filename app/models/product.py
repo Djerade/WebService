@@ -7,10 +7,13 @@ class Product(db.Model):
     name = db.Column(db.String(100), nullable=False)
     description = db.Column(db.Text)
     price = db.Column(db.Float, nullable=False)
-    stock = db.Column(db.Integer, default=0)
+    stock = db.Column(db.Integer, nullable=False)
+    category = db.Column(db.String(50), nullable=False)
     image_filename = db.Column(db.String(255))
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    seller_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    seller = db.relationship('User', backref=db.backref('products', lazy=True))
 
     def __repr__(self):
         return f'<Product {self.name}>'

@@ -36,14 +36,9 @@ def delete_image(filename):
 def vendeur_required(f):
     @wraps(f)
     def decorated_function(*args, **kwargs):
-        if not current_user.is_authenticated:
-            flash('Veuillez vous connecter pour accéder à cette page.', 'warning')
-            return redirect(url_for('user.login'))
-        
-        if not current_user.is_vendeur():
+        if not current_user.is_authenticated or not current_user.is_vendeur():
             flash('Accès refusé. Cette action est réservée aux vendeurs.', 'danger')
             return redirect(url_for('product.list_products'))
-        
         return f(*args, **kwargs)
     return decorated_function
 
@@ -52,62 +47,68 @@ def list_products():
     products = Product.query.all()
     return render_template('products/list.html', products=products)
 
-@product_bp.route('/products/create', methods=['GET', 'POST'])
+@product_bp.route('/my-products')
+@login_required
+@vendeur_required
+def my_products():
+    products = Product.query.filter_by(seller_id=current_user.id).all()
+    return render_template('products/my_products.html', products=products)
+
+@product_bp.route('/product/create', methods=['GET', 'POST'])
 @login_required
 @vendeur_required
 def create_product():
     form = ProductForm()
     if form.validate_on_submit():
-        image_filename = save_image(form.image.data)
-        
         product = Product(
             name=form.name.data,
             description=form.description.data,
             price=form.price.data,
             stock=form.stock.data,
-            image_filename=image_filename
+            category=form.category.data,
+            seller_id=current_user.id
         )
         db.session.add(product)
         db.session.commit()
         flash('Produit créé avec succès!', 'success')
-        return redirect(url_for('product.list_products'))
+        return redirect(url_for('product.my_products'))
     return render_template('products/create.html', form=form)
 
-@product_bp.route('/products/<int:id>/edit', methods=['GET', 'POST'])
+@product_bp.route('/product/<int:id>/edit', methods=['GET', 'POST'])
 @login_required
 @vendeur_required
 def edit_product(id):
     product = Product.query.get_or_404(id)
-    form = ProductForm(obj=product)
+    if product.seller_id != current_user.id:
+        flash('Vous n\'êtes pas autorisé à modifier ce produit.', 'danger')
+        return redirect(url_for('product.my_products'))
     
+    form = ProductForm(obj=product)
     if form.validate_on_submit():
-        if form.image.data:
-            # Supprimer l'ancienne image
-            delete_image(product.image_filename)
-            # Sauvegarder la nouvelle image
-            image_filename = save_image(form.image.data)
-            product.image_filename = image_filename
-            
         product.name = form.name.data
         product.description = form.description.data
         product.price = form.price.data
         product.stock = form.stock.data
-        
         db.session.commit()
         flash('Produit mis à jour avec succès!', 'success')
-        return redirect(url_for('product.list_products'))
+        return redirect(url_for('product.my_products'))
     return render_template('products/edit.html', form=form, product=product)
 
-@product_bp.route('/products/<int:id>/delete', methods=['POST'])
+@product_bp.route('/product/<int:id>/delete', methods=['POST'])
 @login_required
 @vendeur_required
 def delete_product(id):
     product = Product.query.get_or_404(id)
-    
-    # Supprimer l'image associée
-    delete_image(product.image_filename)
+    if product.seller_id != current_user.id:
+        flash('Vous n\'êtes pas autorisé à supprimer ce produit.', 'danger')
+        return redirect(url_for('product.my_products'))
     
     db.session.delete(product)
     db.session.commit()
     flash('Produit supprimé avec succès!', 'success')
-    return redirect(url_for('product.list_products')) 
+    return redirect(url_for('product.my_products'))
+
+@product_bp.route('/product/<int:id>')
+def product_detail(id):
+    product = Product.query.get_or_404(id)
+    return render_template('products/detail.html', product=product) 
