@@ -2,12 +2,16 @@ from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
 from flask_wtf.csrf import CSRFProtect
+from flask_login import LoginManager
 from .config import Config
 
 # Initialisation des extensions
 db = SQLAlchemy()
 migrate = Migrate()
 csrf = CSRFProtect()
+login_manager = LoginManager()
+login_manager.login_view = 'user.login'
+login_manager.login_message = 'Veuillez vous connecter pour accéder à cette page.'
 
 def create_app(config_class=Config):
     app = Flask(__name__)
@@ -17,9 +21,14 @@ def create_app(config_class=Config):
     db.init_app(app)
     migrate.init_app(app, db)
     csrf.init_app(app)
+    login_manager.init_app(app)
 
     # Enregistrement des blueprints
+    from .controllers.main_controller import main_bp
     from .controllers.product_controller import product_bp
+    from .controllers.user_controller import user_bp
+    app.register_blueprint(main_bp)
     app.register_blueprint(product_bp)
+    app.register_blueprint(user_bp)
 
     return app 

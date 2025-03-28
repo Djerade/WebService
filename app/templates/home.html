@@ -1,0 +1,97 @@
+{% extends "base.html" %} {% block content %}
+<div class="container mt-4">
+  <div class="row">
+    <div class="col-md-12">
+      <h1 class="mb-4">Bienvenue, {{ current_user.username }} !</h1>
+    </div>
+  </div>
+
+  <div class="row mb-4">
+    <div class="col-md-4">
+      <div class="card">
+        <div class="card-body">
+          <h5 class="card-title">Gestion des Produits</h5>
+          <p class="card-text">
+            Accédez à la liste complète des produits et gérez votre inventaire.
+          </p>
+          <a
+            href="{{ url_for('product.list_products') }}"
+            class="btn btn-primary"
+            >Voir les produits</a
+          >
+        </div>
+      </div>
+    </div>
+    <div class="col-md-4">
+      <div class="card">
+        <div class="card-body">
+          <h5 class="card-title">Ajouter un Produit</h5>
+          <p class="card-text">Ajoutez un nouveau produit à votre catalogue.</p>
+          <a
+            href="{{ url_for('product.create_product') }}"
+            class="btn btn-success"
+            >Nouveau produit</a
+          >
+        </div>
+      </div>
+    </div>
+    <div class="col-md-4">
+      <div class="card">
+        <div class="card-body">
+          <h5 class="card-title">Mon Compte</h5>
+          <p class="card-text">
+            Gérez vos informations personnelles et vos préférences.
+          </p>
+          <a href="#" class="btn btn-info">Mon profil</a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="row">
+    <div class="col-md-12">
+      <h2 class="mb-3">Derniers produits ajoutés</h2>
+      <div class="row row-cols-1 row-cols-md-3 g-4">
+        {% for product in latest_products %}
+        <div class="col">
+          <div class="card h-100">
+            {% if product.image_filename %}
+            <img
+              src="{{ url_for('static', filename=product.image_path) }}"
+              class="card-img-top"
+              alt="{{ product.name }}"
+              style="height: 200px; object-fit: cover"
+            />
+            {% else %}
+            <div
+              class="card-img-top bg-light d-flex align-items-center justify-content-center"
+              style="height: 200px"
+            >
+              <span class="text-muted">Pas d'image</span>
+            </div>
+            {% endif %}
+            <div class="card-body">
+              <h5 class="card-title">{{ product.name }}</h5>
+              <p class="card-text">{{ product.description }}</p>
+              <p class="card-text">
+                <strong>Prix:</strong> {{ "%.2f"|format(product.price) }} €<br />
+                <strong>Stock:</strong> {{ product.stock }}
+              </p>
+            </div>
+            <div class="card-footer">
+              <div class="btn-group w-100">
+                <a
+                  href="{{ url_for('product.edit_product', id=product.id) }}"
+                  class="btn btn-warning"
+                  >Modifier</a
+                >
+              </div>
+            </div>
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

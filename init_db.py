@@ -1,5 +1,6 @@
 from app import create_app, db
 from app.models.product import Product
+from app.models.user import User
 
 def init_db():
     app = create_app()
