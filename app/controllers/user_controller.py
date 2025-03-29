@@ -1,7 +1,7 @@
 from flask import Blueprint, render_template, redirect, url_for, flash, request
 from flask_login import login_user, logout_user, login_required, current_user
 from app.models.user import User
-from app.forms.user_form import LoginForm, RegistrationForm
+from app.forms.user_form import LoginForm, RegistrationForm, ProfileForm
 from app import db
 from datetime import datetime
 from app.models.product import Product
@@ -15,24 +15,15 @@ def login():
     
     form = LoginForm()
     if form.validate_on_submit():
-        user = User.query.filter_by(username=form.username.data).first()
-        if user is None or not user.check_password(form.password.data):
-            flash('Nom d\'utilisateur ou mot de passe incorrect', 'danger')
-            return redirect(url_for('user.login'))
-        
-        if not user.is_active:
-            flash('Votre compte est désactivé. Veuillez contacter l\'administrateur.', 'danger')
-            return redirect(url_for('user.login'))
-        
-        login_user(user, remember=form.remember_me.data)
-        user.last_login = datetime.utcnow()
-        db.session.commit()
-        
-        next_page = request.args.get('next')
-        if not next_page or not next_page.startswith('/'):
-            next_page = url_for('main.home')
-        return redirect(next_page)
-    
+        user = User.query.filter_by(email=form.email.data).first()
+        if user and user.check_password(form.password.data):
+            if not user.is_active:
+                flash('Votre compte est désactivé. Veuillez contacter l\'administrateur.', 'error')
+                return redirect(url_for('user.login'))
+            login_user(user)
+            next_page = request.args.get('next')
+            return redirect(next_page or url_for('main.home'))
+        flash('Email ou mot de passe incorrect.', 'error')
     return render_template('users/login.html', title='Connexion', form=form)
 
 @user_bp.route('/register', methods=['GET', 'POST'])
@@ -50,7 +41,7 @@ def register():
         user.set_password(form.password.data)
         db.session.add(user)
         db.session.commit()
-        flash('Félicitations, vous êtes maintenant inscrit!', 'success')
+        flash('Inscription réussie ! Vous pouvez maintenant vous connecter.', 'success')
         return redirect(url_for('user.login'))
     
     return render_template('users/register.html', title='Inscription', form=form)
@@ -59,6 +50,7 @@ def register():
 @login_required
 def logout():
     logout_user()
+    flash('Vous avez été déconnecté avec succès.', 'success')
     return redirect(url_for('main.home'))
 
 @user_bp.route('/dashboard')
@@ -80,4 +72,18 @@ def dashboard():
                          total_products=total_products,
                          products_in_stock=products_in_stock,
                          low_stock_products=low_stock_products,
-                         recent_products=recent_products) 
+                         recent_products=recent_products)
+
+@user_bp.route('/profile', methods=['GET', 'POST'])
+@login_required
+def profile():
+    form = ProfileForm(obj=current_user)
+    if form.validate_on_submit():
+        current_user.username = form.username.data
+        current_user.email = form.email.data
+        if form.password.data:
+            current_user.set_password(form.password.data)
+        db.session.commit()
+        flash('Votre profil a été mis à jour avec succès.', 'success')
+        return redirect(url_for('user.profile'))
+    return render_template('users/profile.html', title='Mon Profil', form=form) 
