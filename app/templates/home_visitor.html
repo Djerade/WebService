@@ -1,38 +1,28 @@
 {% extends "base.html" %} {% block content %}
 <!-- Hero Section -->
-<div class="bg-green-600 text-white">
-  <div class="container mx-auto px-4 py-16">
-    <div class="flex flex-col md:flex-row items-center">
-      <div class="md:w-1/2 mb-8 md:mb-0">
-        <h1 class="text-4xl md:text-5xl font-bold mb-4">
-          Marché Agricole en Ligne
-        </h1>
-        <p class="text-xl mb-8">
-          Découvrez des produits agricoles frais directement des producteurs
-          locaux
-        </p>
-        <div class="space-x-4">
-          <a
-            href="{{ url_for('user.register') }}"
-            class="bg-white text-green-600 px-6 py-3 rounded-lg font-semibold hover:bg-gray-100 transition duration-200"
-          >
-            Devenir Vendeur
-          </a>
-          <a
-            href="{{ url_for('user.login') }}"
-            class="border-2 border-white text-white px-6 py-3 rounded-lg font-semibold hover:bg-white hover:text-green-600 transition duration-200"
-          >
-            Se connecter
-          </a>
-        </div>
-      </div>
-      <div class="md:w-1/2">
-        <img
-          src="{{ url_for('static', filename='images/farm-hero.jpg') }}"
-          alt="Produits Agricoles"
-          class="rounded-lg shadow-xl"
-        />
-      </div>
+<div class="relative bg-gradient-to-r from-green-600 to-green-800 text-white">
+  <div class="absolute inset-0">
+    <div
+      class="absolute inset-0 bg-gradient-to-r from-green-600 to-green-800 opacity-90"
+    ></div>
+  </div>
+  <div class="relative max-w-7xl mx-auto py-24 px-4 sm:py-32 sm:px-6 lg:px-8">
+    <h1 class="text-4xl font-extrabold tracking-tight sm:text-5xl lg:text-6xl">
+      Bienvenue sur AgriMarket
+    </h1>
+    <p class="mt-6 text-xl max-w-3xl">
+      Découvrez des produits agricoles frais provenant directement des
+      producteurs locaux. Une plateforme simple et efficace pour connecter les
+      vendeurs et les acheteurs.
+    </p>
+    <div class="mt-10">
+      <a
+        href="{{ url_for('product.list_products') }}"
+        class="inline-flex items-center px-6 py-3 border border-transparent text-base font-medium rounded-md text-green-600 bg-white hover:bg-green-50"
+      >
+        Voir les produits
+        <i class="fas fa-arrow-right ml-2"></i>
+      </a>
     </div>
   </div>
 </div>
@@ -84,9 +74,9 @@
     <div
       class="bg-white rounded-lg shadow-lg overflow-hidden hover:shadow-xl transition duration-200"
     >
-      {% if product.image_filename %}
+      {% if product.get_image_url() %}
       <img
-        src="{{ url_for('static', filename='uploads/' + product.image_filename) }}"
+        src="{{ url_for('static', filename='uploads/' + product.get_image_url()) }}"
         alt="{{ product.name }}"
         class="w-full h-48 object-cover"
       />

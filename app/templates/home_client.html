@@ -6,17 +6,57 @@
     </h1>
   </div>
 
+  <!-- Quick Actions -->
+
+  <div>
+    <h2 class="text-2xl font-semibold text-gray-800 mb-6">Actions Rapides</h2>
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+      <div class="bg-white rounded-lg shadow-lg p-6 text-center">
+        <i class="fas fa-shopping-cart text-4xl text-blue-600 mb-4"></i>
+        <h3 class="text-xl font-semibold text-gray-800 mb-2">Mon Panier</h3>
+        <p class="text-gray-600 mb-4">Gérez vos articles</p>
+        <a
+          href="#"
+          class="inline-block bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition duration-200"
+        >
+          Voir le panier
+        </a>
+      </div>
+      <div class="bg-white rounded-lg shadow-lg p-6 text-center">
+        <i class="fas fa-list text-4xl text-green-600 mb-4"></i>
+        <h3 class="text-xl font-semibold text-gray-800 mb-2">Mes Commandes</h3>
+        <p class="text-gray-600 mb-4">Suivez vos commandes</p>
+        <a
+          href="#"
+          class="inline-block bg-green-600 text-white px-6 py-2 rounded-lg hover:bg-green-700 transition duration-200"
+        >
+          Voir les commandes
+        </a>
+      </div>
+      <div class="bg-white rounded-lg shadow-lg p-6 text-center">
+        <i class="fas fa-user text-4xl text-indigo-600 mb-4"></i>
+        <h3 class="text-xl font-semibold text-gray-800 mb-2">Mon Profil</h3>
+        <p class="text-gray-600 mb-4">Gérez vos informations</p>
+        <a
+          href="#"
+          class="inline-block bg-indigo-600 text-white px-6 py-2 rounded-lg hover:bg-indigo-700 transition duration-200"
+        >
+          Modifier le profil
+        </a>
+      </div>
+    </div>
+  </div>
   <!-- Featured Products -->
-  <div class="mb-12">
+  <div class="mb-12 mt-12">
     <h2 class="text-2xl font-semibold text-gray-800 mb-6">
       Produits en Vedette
     </h2>
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
       {% for product in latest_products %}
       <div class="bg-white rounded-lg shadow-lg overflow-hidden">
-        {% if product.image_filename %}
+        {% if product.get_image_url() %}
         <img
-          src="{{ url_for('static', filename='uploads/' + product.image_filename) }}"
+          src="{{ url_for('static', filename='uploads/' + product.get_image_url()) }}"
           alt="{{ product.name }}"
           class="w-full h-48 object-cover"
         />
@@ -56,46 +96,6 @@
         </div>
       </div>
       {% endfor %}
-    </div>
-  </div>
-
-  <!-- Quick Actions -->
-  <div>
-    <h2 class="text-2xl font-semibold text-gray-800 mb-6">Actions Rapides</h2>
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-      <div class="bg-white rounded-lg shadow-lg p-6 text-center">
-        <i class="fas fa-shopping-cart text-4xl text-blue-600 mb-4"></i>
-        <h3 class="text-xl font-semibold text-gray-800 mb-2">Mon Panier</h3>
-        <p class="text-gray-600 mb-4">Gérez vos articles</p>
-        <a
-          href="#"
-          class="inline-block bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition duration-200"
-        >
-          Voir le panier
-        </a>
-      </div>
-      <div class="bg-white rounded-lg shadow-lg p-6 text-center">
-        <i class="fas fa-list text-4xl text-green-600 mb-4"></i>
-        <h3 class="text-xl font-semibold text-gray-800 mb-2">Mes Commandes</h3>
-        <p class="text-gray-600 mb-4">Suivez vos commandes</p>
-        <a
-          href="#"
-          class="inline-block bg-green-600 text-white px-6 py-2 rounded-lg hover:bg-green-700 transition duration-200"
-        >
-          Voir les commandes
-        </a>
-      </div>
-      <div class="bg-white rounded-lg shadow-lg p-6 text-center">
-        <i class="fas fa-user text-4xl text-indigo-600 mb-4"></i>
-        <h3 class="text-xl font-semibold text-gray-800 mb-2">Mon Profil</h3>
-        <p class="text-gray-600 mb-4">Gérez vos informations</p>
-        <a
-          href="#"
-          class="inline-block bg-indigo-600 text-white px-6 py-2 rounded-lg hover:bg-indigo-700 transition duration-200"
-        >
-          Modifier le profil
-        </a>
-      </div>
     </div>
   </div>
 </div>

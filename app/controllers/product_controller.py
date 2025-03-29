@@ -10,6 +10,9 @@ from functools import wraps
 
 product_bp = Blueprint('product', __name__)
 
+def allowed_file(filename):
+    return '.' in filename and filename.rsplit('.', 1)[1].lower() in current_app.config['ALLOWED_EXTENSIONS']
+
 def save_image(image_file):
     if not image_file:
         return None
@@ -58,6 +61,10 @@ def my_products():
 @login_required
 @vendeur_required
 def create_product():
+    if not current_user.is_vendeur():
+        flash("Accès refusé. Cette action est réservée aux vendeurs.", "error")
+        return redirect(url_for("product.list_products"))
+    
     form = ProductForm()
     if form.validate_on_submit():
         product = Product(
@@ -68,20 +75,38 @@ def create_product():
             category=form.category.data,
             seller_id=current_user.id
         )
+        
+        # Gestion de l'image
+        if form.image.data:
+            file = form.image.data
+            if file and allowed_file(file.filename):
+                filename = secure_filename(file.filename)
+                # Créer le dossier uploads s'il n'existe pas
+                os.makedirs(current_app.config['UPLOAD_FOLDER'], exist_ok=True)
+                # Sauvegarder le fichier
+                file_path = os.path.join(current_app.config['UPLOAD_FOLDER'], filename)
+                file.save(file_path)
+                product.image_path = filename
+        
         db.session.add(product)
         db.session.commit()
-        flash('Produit créé avec succès!', 'success')
-        return redirect(url_for('product.my_products'))
-    return render_template('products/create.html', form=form)
+        flash("Produit créé avec succès !", "success")
+        return redirect(url_for("product.list_products"))
+    
+    return render_template("products/create.html", form=form)
 
 @product_bp.route('/product/<int:id>/edit', methods=['GET', 'POST'])
 @login_required
 @vendeur_required
 def edit_product(id):
+    if not current_user.is_vendeur():
+        flash("Accès refusé. Cette action est réservée aux vendeurs.", "error")
+        return redirect(url_for("product.list_products"))
+    
     product = Product.query.get_or_404(id)
     if product.seller_id != current_user.id:
-        flash('Vous n\'êtes pas autorisé à modifier ce produit.', 'danger')
-        return redirect(url_for('product.my_products'))
+        flash("Vous n'êtes pas autorisé à modifier ce produit.", "error")
+        return redirect(url_for("product.list_products"))
     
     form = ProductForm(obj=product)
     if form.validate_on_submit():
@@ -89,24 +114,55 @@ def edit_product(id):
         product.description = form.description.data
         product.price = form.price.data
         product.stock = form.stock.data
+        product.category = form.category.data
+        
+        # Gestion de l'image
+        if form.image.data:
+            file = form.image.data
+            if file and allowed_file(file.filename):
+                # Supprimer l'ancienne image si elle existe
+                if product.image_path:
+                    old_file_path = os.path.join(current_app.config['UPLOAD_FOLDER'], product.image_path)
+                    if os.path.exists(old_file_path):
+                        os.remove(old_file_path)
+                
+                filename = secure_filename(file.filename)
+                # Créer le dossier uploads s'il n'existe pas
+                os.makedirs(current_app.config['UPLOAD_FOLDER'], exist_ok=True)
+                # Sauvegarder le nouveau fichier
+                file_path = os.path.join(current_app.config['UPLOAD_FOLDER'], filename)
+                file.save(file_path)
+                product.image_path = filename
+        
         db.session.commit()
-        flash('Produit mis à jour avec succès!', 'success')
-        return redirect(url_for('product.my_products'))
-    return render_template('products/edit.html', form=form, product=product)
+        flash("Produit mis à jour avec succès !", "success")
+        return redirect(url_for("product.list_products"))
+    
+    return render_template("products/edit.html", form=form, product=product)
 
 @product_bp.route('/product/<int:id>/delete', methods=['POST'])
 @login_required
 @vendeur_required
 def delete_product(id):
+    if not current_user.is_vendeur():
+        flash("Accès refusé. Cette action est réservée aux vendeurs.", "error")
+        return redirect(url_for("product.list_products"))
+    
     product = Product.query.get_or_404(id)
     if product.seller_id != current_user.id:
-        flash('Vous n\'êtes pas autorisé à supprimer ce produit.', 'danger')
-        return redirect(url_for('product.my_products'))
+        flash("Vous n'êtes pas autorisé à supprimer ce produit.", "error")
+        return redirect(url_for("product.list_products"))
+    
+    # Supprimer l'image si elle existe
+    if product.image_path:
+        file_path = os.path.join(current_app.config['UPLOAD_FOLDER'], product.image_path)
+        if os.path.exists(file_path):
+            os.remove(file_path)
     
     db.session.delete(product)
     db.session.commit()
-    flash('Produit supprimé avec succès!', 'success')
-    return redirect(url_for('product.my_products'))
+    flash("Produit supprimé avec succès !", "success")
+    return redirect(url_for("product.list_products"))
 
 @product_bp.route('/product/<int:id>')
 def product_detail(id):
