@@ -1,6 +1,7 @@
 from flask import Blueprint, render_template, redirect, url_for, flash, request
 from flask_login import login_user, logout_user, login_required, current_user
 from app.models.user import User
+from app.models.message import Message
 from app.forms.user_form import LoginForm, RegistrationForm, ProfileForm
 from app import db
 from datetime import datetime
@@ -36,6 +37,7 @@ def register():
         user = User(
             username=form.username.data,
             email=form.email.data,
+            phone_number=form.phone_number.data,
             user_type=form.user_type.data
         )
         user.set_password(form.password.data)
@@ -87,3 +89,46 @@ def profile():
         flash('Votre profil a été mis à jour avec succès.', 'success')
         return redirect(url_for('user.profile'))
     return render_template('users/profile.html', title='Mon Profil', form=form) 
+
+
+
+@user_bp.route('/messages', methods=['GET', 'POST'])
+@login_required
+def messages():
+        if not current_user.is_authenticated:
+            flash('Vous devez être connecté pour accéder aux messages.', 'danger')
+            return redirect(url_for('user.login'))
+
+        if request.method == 'POST':
+            recipient_id = request.form.get('recipient_id')
+            message_content = request.form.get('message')
+            
+            if not recipient_id or not message_content:
+                flash('Tous les champs sont obligatoires.', 'danger')
+                return redirect(url_for('user.messages'))
+            
+            recipient = User.query.get(recipient_id)
+            if not recipient:
+                flash('Utilisateur destinataire introuvable.', 'danger')
+                return redirect(url_for('user.messages'))
+            
+            # Créer un nouveau message
+            new_message = Message(
+                sender_id=current_user.id,
+                recipient_id=recipient_id,
+                content=message_content,
+                timestamp=datetime.utcnow()
+            )
+            db.session.add(new_message)
+            db.session.commit()
+            flash('Message envoyé avec succès.', 'success')
+            return redirect(url_for('user.messages'))
+        
+        # Récupérer les messages de l'utilisateur
+        sent_messages = Message.query.filter_by(sender_id=current_user.id).all()
+        received_messages = Message.query.filter_by(recipient_id=current_user.id).all()
+        
+        return render_template('users/messages.html',
+                               title='Messages',
+                               sent_messages=sent_messages,
+                               received_messages=received_messages)

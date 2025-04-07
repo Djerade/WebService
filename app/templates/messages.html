@@ -1,0 +1,42 @@
+{% extends "base.html" %} {% block content %}
+<div class="container mx-auto px-4 py-8">
+  <div class="mb-8">
+    <h1 class="text-3xl font-bold text-gray-800">
+      Chat avec {{ seller.username }}
+    </h1>
+  </div>
+
+  <!-- Chat Messages -->
+  <div class="bg-white rounded-lg shadow-lg p-6 mb-8">
+    <div id="chat-messages" class="max-h-96 overflow-y-auto">
+      {% for message in messages %}
+      <div class="mb-4">
+        <strong>{{ message.sender.username }}:</strong>
+        <p>{{ message.content }}</p>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+
+  <!-- Message Input -->
+  <form
+    id="message-form"
+    action="{{ url_for('chat.send_message', seller_id=seller.id) }}"
+    method="POST"
+  >
+    <textarea
+      id="message-input"
+      name="message"
+      rows="3"
+      class="w-full p-4 border border-gray-300 rounded-lg"
+      placeholder="Écrivez votre message ici..."
+    ></textarea>
+    <button
+      type="submit"
+      class="mt-4 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition duration-200"
+    >
+      Envoyer
+    </button>
+  </form>
+</div>
+{% endblock %}
