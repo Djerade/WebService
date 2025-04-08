@@ -126,7 +126,7 @@ def messages():
         
         # Récupérer les messages de l'utilisateur
         sent_messages = Message.query.filter_by(sender_id=current_user.id).all()
-        received_messages = Message.query.filter_by(recipient_id=current_user.id).all()
+        received_messages = Message.query.filter_by(receiver_id=current_user.id).all()
         
         return render_template('users/messages.html',
                                title='Messages',

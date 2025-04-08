@@ -88,7 +88,7 @@
             {% endif %}
           </div>
           <a
-            href="user/{{ product.seller_id }}/product/{{ product.id }}"
+            href="{{ url_for('user.messages', seller_id=product.seller_id) }}"
             class="mt-4 block w-full text-center bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700 transition duration-200"
           >
             Voir détails
