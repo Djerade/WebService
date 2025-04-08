@@ -8,8 +8,6 @@ class ProductForm(FlaskForm):
     category = SelectField('Catégorie', choices=[
         ('fruits', 'Fruits'),
         ('legumes', 'Légumes'),
-        ('viandes', 'Viandes'),
-        ('produits_laitiers', 'Produits Laitiers'),
         ('autres', 'Autres')
     ], validators=[DataRequired()])
     description = TextAreaField('Description', validators=[DataRequired()])
